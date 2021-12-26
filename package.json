@@ -1,0 +1,10 @@
+{
+    "name": "pb_exceptions",
+    "version": "0.0.0",
+    "description": "Permission Boundary Exception.",
+    "dependencies": {
+        "serverless-prune-plugin": "^1.5.1",
+        "serverless-python-requirements": "^5.1.1",
+        "serverless-stack-output": "^0.2.3"
+    }
+}

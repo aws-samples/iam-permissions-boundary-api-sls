@@ -1,0 +1,179 @@
+service: pb-exceptions
+
+provider:
+  name: aws
+  runtime: python3.6
+  timeout: 900
+  region: us-east-1
+  vpcEndpointIds:
+    - ${self:custom.VPC_ENDPOINT_ID}
+  deploymentBucket:
+    name: ${self:custom.DEPLOYMENT_BUCKET}
+    serverSideEncryption: AES256
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - sts:AssumeRole
+        - secretsmanager:GetSecretValue
+      Resource:
+        - '*'
+  environment:
+    # Env
+    ENVIRONMENT: ${opt:stage}
+    REGION: ${opt:region, self:provider.region}
+    # LDAP
+    LDAP_SERVER: ${self:custom.LDAP_SERVER}
+    LDAP_USERNAME: ${self:custom.LDAP_USERNAME}
+    LDAP_PASSWORD_SECRET_NAME: ${self:custom.LDAP_PASSWORD_SECRET_NAME}
+    LDAP_SEARCH_BASE: ${self:custom.LDAP_SEARCH_BASE}
+    LDAP_OBJECT_CLASS: ${self:custom.LDAP_OBJECT_CLASS}
+    LDAP_GROUP_NAME: ${self:custom.LDAP_GROUP_NAME}
+    LDAP_USER_LOOKUP_ATTRIBUTE: ${self:custom.LDAP_USER_LOOKUP_ATTRIBUTE}
+    LDAP_GROUP_LOOKUP_ATTRIBUTE: ${self:custom.LDAP_GROUP_LOOKUP_ATTRIBUTE}
+    # OAuth
+    MSFT_IDP_TENANT_ID: ${self:custom.MSFT_IDP_TENANT_ID}
+    MSFT_IDP_APP_ID: ${self:custom.MSFT_IDP_APP_ID}
+    MSFT_IDP_CLIENT_ROLES: ${self:custom.MSFT_IDP_CLIENT_ROLES}
+    MSFT_OAUTH2_TOKEN_URL: ${self:custom.MSFT_OAUTH2_TOKEN_URL}
+    # App Environment Variables
+    PB_POLICY_ARN_TPL: ${self:custom.PB_POLICY_ARN_TPL}
+    APP_SECRET_NAME: ${self:custom.APP_SECRET_NAME}
+    APP_CLIENT_ID: ${self:custom.APP_CLIENT_ID}
+    # VPCx Variables
+    CREDS_API_HOSTNAME: ${self:custom.CREDS_API_HOSTNAME}
+    CREDS_API_VPCE_ENDPOINT: ${self:custom.CREDS_API_VPCE_ENDPOINT}
+    CREDS_API_SCOPE: ${self:custom.CREDS_API_SCOPE}
+    APPSYNC_INFO_SECRET_NAME: ${self:custom.APPSYNC_INFO_SECRET_NAME}
+    UPDATE_PB_API_SCOPE: ${self:custom.UPDATE_PB_API_SCOPE}
+    UPDATE_PB_API_URL: ${self:custom.UPDATE_PB_API_URL}
+
+functions:
+  disable-pb-exceptions:
+    handler: disable_pb_exceptions/index.handler
+    events:
+      - alb:
+          listenerArn: ${self:custom.ALB_HTTP_LISTENER_ARN}
+          priority: 18
+          conditions:
+            path: /account/exceptions/pb-exception/disable
+            method:
+              - DELETE
+      - alb:
+          listenerArn: ${self:custom.ALB_HTTPS_LISTENER_ARN}
+          priority: 19
+          conditions:
+            path: /account/exceptions/pb-exception/disable
+            method:
+              - DELETE
+    vpc:
+      securityGroupIds: ${self:custom.SECURITY_GROUPS}
+      subnetIds: ${self:custom.SUBNETS}
+  enable-pb-exceptions:
+    handler: enable_pb_exceptions/index.handler
+    events:
+      - alb:
+          listenerArn: ${self:custom.ALB_HTTP_LISTENER_ARN}
+          priority: 16
+          conditions:
+            path: /account/exceptions/pb-exception/enable
+            method:
+              - POST
+      - alb:
+          listenerArn: ${self:custom.ALB_HTTPS_LISTENER_ARN}
+          priority: 17
+          conditions:
+            path: /account/exceptions/pb-exception/enable
+            method:
+              - POST
+    vpc:
+      securityGroupIds: ${self:custom.SECURITY_GROUPS}
+      subnetIds: ${self:custom.SUBNETS}
+  verify-pb-exceptions:
+    handler: verify_pb_exceptions/index.handler
+    events:
+      - alb:
+          listenerArn: ${self:custom.ALB_HTTP_LISTENER_ARN}
+          priority: 20
+          conditions:
+            path: /account/exceptions/pb-exception/verify
+            method:
+              - POST
+      - alb:
+          listenerArn: ${self:custom.ALB_HTTPS_LISTENER_ARN}
+          priority: 21
+          conditions:
+            path: /account/exceptions/pb-exception/verify
+            method:
+              - POST
+    vpc:
+      securityGroupIds: ${self:custom.SECURITY_GROUPS}
+      subnetIds: ${self:custom.SUBNETS}
+
+custom:
+  output:
+    file: stack-outputs.json
+  prune:
+    automatic: true
+    number: 3
+  pythonRequirements:
+    dockerizePip: non-linux
+    slim: true
+    slimPatterns:
+      - "**/*.egg-info*"
+    noDeploy: [ ]
+    pipCmdExtraArgs:
+      - --extra-index-url=http://itsusralsp07062.test-org.com:8090
+      - --trusted-host=itsusralsp07062.test-org.com
+      - --extra-index-url https://pypi.jjapi.test-org.com/v1/itxyz-abp/private/dev/
+      - --extra-index-url https://pypi.jjapi.test-org.com/v1/itxyz-alz/shared/production/
+  stage: ${opt:stage}
+  func_prefix: ${self:service}-${self:custom.stage}
+  # LDAP
+  LDAP_SERVER: ${file(config/config.common.json):ENVIRONMENT.LDAP.LDAP_SERVER}
+  LDAP_USERNAME: ${file(config/config.common.json):ENVIRONMENT.LDAP.LDAP_USERNAME}
+  LDAP_PASSWORD_SECRET_NAME: ${file(config/config.common.json):ENVIRONMENT.LDAP.LDAP_PASS_SECRET_NAME}
+  LDAP_SEARCH_BASE: ${file(config/config.common.json):ENVIRONMENT.LDAP.LDAP_SEARCH_BASE}
+  LDAP_OBJECT_CLASS: ${file(config/config.common.json):ENVIRONMENT.LDAP.LDAP_OBJECT_CLASS}
+  LDAP_GROUP_NAME: ${file(config/config.common.json):ENVIRONMENT.LDAP.LDAP_GROUP_NAME}
+  LDAP_USER_LOOKUP_ATTRIBUTE: ${file(config/config.common.json):ENVIRONMENT.LDAP.LDAP_USER_LOOKUP_ATTRIBUTE}
+  LDAP_GROUP_LOOKUP_ATTRIBUTE: ${file(config/config.common.json):ENVIRONMENT.LDAP.LDAP_GROUP_LOOKUP_ATTRIBUTE}
+  # OAuth
+  MSFT_OAUTH2_TOKEN_URL: ${file(config/config.common.json):ENVIRONMENT.OAUTH.MSFT_OAUTH2_TOKEN_URL}
+  MSFT_IDP_TENANT_ID: ${file(config/config.common.json):ENVIRONMENT.OAUTH.MSFT_IDP_TENANT_ID}
+  MSFT_IDP_APP_ID: ${file(config/config.${opt:stage}.json):ENVIRONMENT.OAUTH.MSFT_IDP_APP_ID}
+  MSFT_IDP_CLIENT_ROLES: ${file(config/config.common.json):ENVIRONMENT.OAUTH.MSFT_IDP_CLIENT_ROLES}
+  # VPCx Variables
+  CREDS_API_HOSTNAME: ${file(config/config.${opt:stage}.json):ENVIRONMENT.VPCX.CREDS_API_HOSTNAME}
+  CREDS_API_VPCE_ENDPOINT: ${file(config/config.${opt:stage}.json):ENVIRONMENT.VPCX.CREDS_API_VPCE_ENDPOINT}
+  CREDS_API_SCOPE: ${file(config/config.${opt:stage}.json):ENVIRONMENT.VPCX.CREDS_API_SCOPE}
+  APPSYNC_INFO_SECRET_NAME: ${file(config/config.${opt:stage}.json):ENVIRONMENT.VPCX.APPSYNC_INFO_SECRET_NAME}
+  UPDATE_PB_API_SCOPE: ${file(config/config.${opt:stage}.json):ENVIRONMENT.VPCX.UPDATE_PB_API_SCOPE}
+  UPDATE_PB_API_URL: ${file(config/config.${opt:stage}.json):ENVIRONMENT.VPCX.UPDATE_PB_API_URL}
+  # App Variables
+  APP_SECRET_NAME: ${file(config/config.${opt:stage}.json):ENVIRONMENT.APP_VARS.APP_SECRETS_NAME}
+  PB_POLICY_ARN_TPL: ${file(config/config.common.json):ENVIRONMENT.APP_VARS.PB_POLICY_ARN_TPL}
+  APP_CLIENT_ID: ${file(config/config.${opt:stage}.json):ENVIRONMENT.APP_VARS.APP_CLIENT_ID}
+  # Deployment
+  SUBNETS: ${file(config/config.${opt:stage}.json):DEPLOYMENT.SUBNETS}
+  SECURITY_GROUPS: ${file(config/config.${opt:stage}.json):DEPLOYMENT.SECURITY_GROUPS}
+  VPC_ENDPOINT_ID: ${file(config/config.${opt:stage}.json):DEPLOYMENT.VPC_ENDPOINT_ID}
+  DEPLOYMENT_BUCKET: ${file(config/config.${opt:stage}.json):DEPLOYMENT.DEPLOYMENT_BUCKET}
+  DEPLOYMENT_ACCOUNT_NUMBER: ${file(config/config.${opt:stage}.json):DEPLOYMENT.ACCOUNT_NUMBER}
+  ALB_HTTP_LISTENER_ARN: ${file(config/config.${opt:stage}.json):DEPLOYMENT.ALB_HTTP_LISTENER_ARN}
+  ALB_HTTPS_LISTENER_ARN: ${file(config/config.${opt:stage}.json):DEPLOYMENT.ALB_HTTPS_LISTENER_ARN}
+
+plugins:
+  - serverless-python-requirements
+  - serverless-stack-output
+  - serverless-prune-plugin
+
+package:
+  exclude:
+    - node_modules/**
+    - disable_pb_exceptions/tests/**
+    - enable_pb_exceptions/tests/**
+    - verify_pb_exceptions/tests/**
+    - utils/bdd_utils/**
+    - scripts/**
+    - config/**
+    - coveragerc.cfg

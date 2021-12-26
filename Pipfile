@@ -1,0 +1,14 @@
+[packages]
+boto3 = "*"
+ldap3 = "*"
+requests = "*"
+retry = "*"
+
+[dev-packages]
+pytest = "*"
+coverage = "*"
+behave = "*"
+pylint = "==2.8.0"
+
+[requires]
+python_version = "3.6"

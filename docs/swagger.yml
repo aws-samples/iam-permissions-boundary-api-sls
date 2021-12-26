@@ -1,0 +1,214 @@
+openapi: '3.0.0'
+info:
+  description: This App contains API used to generate RDS Patch Info Report for all databases for each VPCx Accounts in each region. 
+  version: 1.0.0
+  title: RDS Pending Maintenance Actions Report
+servers:
+  - url: https://internal-ServiceEnablerALB-29700034.us-east-1.elb.amazonaws.com [Dev]
+  - url: https://internal-ServiceEnablerALB-1722667947.us-east-1.elb.amazonaws.com [QA]
+  - url: http://internal-ServiceEnablerALB-394187301.us-east-1.elb.amazonaws.com [Prod]
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      description: This API uses OAuth 2.
+      flows:
+        implicit:
+          authorizationUrl: https://login.microsoftonline.com/test-org.onmicrosoft.com/oauth2/v2.0/authorize
+          scopes:
+            user: https://clx-awsapi-exception-dev.test-org.com/user_impersonation
+        clientCredentials:
+          tokenUrl: https://login.microsoftonline.com/test-org.onmicrosoft.com/oauth2/v2.0/token
+          scopes:
+            app: https://clx-awsapi-exception-dev.test-org.com/.default
+
+security:
+  - oauth2: [user, app]
+
+paths:
+  /account/exceptions/pb-exception/verify:
+    post:
+      tags:
+      - Verify Account PB Exceptions
+      summary: Verifies if passed action is present in Account pb_exceptions and applied to permission boundary.
+      requestBody:
+        description: API Request body.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                project_id:
+                  type: string
+                exception_actions:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - ec2:StartInstance
+                    - states:*
+
+      responses:
+        '200':
+          description: OK | Return Signed Url of Report if '?recreate=false'
+          content:
+            application/json:
+              example: {
+                "message": "'pb_exceptions' applied for actions '['ec2:StartInstance', 'states:*']' in account 'itxyz-000'."
+              }
+        '400':
+          description: BAD_REQUEST | Invalid payload
+          content:
+            application/json:
+              example: {
+                 "message": "Invalid payload. Request missing required field 'exception_actions' of type <list>."
+             }
+        '401':
+          description: UnAuthorized
+          content:
+            application/json:
+              example: {
+                  "error": {
+                      "code": "UnAuthorized",
+                      "message": "Signature has expired"
+                  }
+              }
+        '404':
+          description: NOT_FOUND | Invalid AWS Account | Action not in pb | Action not in pb_exceptions
+          content:
+            application/json:
+              example: {
+                "message": "Actions '['states:*']' not found in 'pb_exceptions' for account 'itxyz-000'."
+              }
+        '500':
+          description: Internal Server Error | Exception occured
+          content:
+            application/json:
+              example: {
+                  "message": "Lambda execution failed. Details - mock exception"
+              }
+  /account/exceptions/pb-exception/enable:
+    post:
+      tags:
+      - Enable Account PB Exceptions
+      summary: Add action to Account pb_exceptions and permission boundary.
+      requestBody:
+        description: API Request body.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                project_id:
+                  type: string
+                exception_actions:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - ec2:StartInstance
+                    - states:*
+
+      responses:
+        '200':
+          description: OK | Updated PB Exceptions for account
+          content:
+            application/json:
+              example: {
+                "message": "'pb_exceptions' applied for actions '['ec2:StartInstance', 'states:*']' in account 'itxyz-000'."
+              }
+        '400':
+          description: BAD_REQUEST | Invalid payload | Invalid exceptiont action
+          content:
+            application/json:
+              example: {
+                 "message": "Invalid payload. Request missing required field 'exception_actions' of type <list>."
+             }
+        '401':
+          description: UnAuthorized
+          content:
+            application/json:
+              example: {
+                  "error": {
+                      "code": "UnAuthorized",
+                      "message": "Signature has expired"
+                  }
+              }
+        '404':
+          description: NOT_FOUND | Invalid AWS Account
+          content:
+            application/json:
+              example: {
+                "message": "Invalid AWS Account."
+              }
+        '500':
+          description: Internal Server Error | Exception occured
+          content:
+            application/json:
+              example: {
+                  "message": "Lambda execution failed. Details - mock exception"
+              }
+  /account/exceptions/pb-exception/disable:
+    delete:
+      tags:
+      - Disable Account PB Exceptions
+      summary: Removes actions from Account pb_exceptions and permission boundary.
+      requestBody:
+        description: API Request body.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                project_id:
+                  type: string
+                exception_actions:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - ec2:StartInstance
+                    - states:*
+
+      responses:
+        '200':
+          description: OK | Updated PB Exceptions for account
+          content:
+            application/json:
+              example: {
+                "message": "Successfully updated 'pb_exceptions' for account 'itxyz-000'"
+              }
+        '400':
+          description: BAD_REQUEST | Invalid payload
+          content:
+            application/json:
+              example: {
+                 "message": "Invalid payload. Request missing required field 'exception_actions' of type <list>."
+             }
+        '401':
+          description: UnAuthorized
+          content:
+            application/json:
+              example: {
+                  "error": {
+                      "code": "UnAuthorized",
+                      "message": "Signature has expired"
+                  }
+              }
+        '404':
+          description: NOT_FOUND | Invalid AWS Account
+          content:
+            application/json:
+              example: {
+                "message": "Invalid AWS Account."
+              }
+        '500':
+          description: Internal Server Error | Exception occured
+          content:
+            application/json:
+              example: {
+                  "message": "Lambda execution failed. Details - mock exception"
+              }

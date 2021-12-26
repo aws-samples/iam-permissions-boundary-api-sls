@@ -1,0 +1,40 @@
+{
+  "DEPLOYMENT": {
+    "ACCOUNT": "itxyz-000",
+    "ACCOUNT_NUMBER": "703271",
+    "SUBNETS": [
+      "subnet-d1b151be",
+      "subnet-eaa1b3c6"
+    ],
+    "SECURITY_GROUPS": [
+      "sg-8b864be4",
+      "sg-57814c38"
+    ],
+    "VPC_ENDPOINT_ID": "vpce-027fc69",
+    "DEPLOYMENT_BUCKET": "itxyz-000-lambda-package-us-east-1",
+    "ALB_HTTP_LISTENER_ARN": "arn:aws:elasticloadbalancing:us-east-1:771:listener/app/ServiceEnablerALB/9a80a67ebf0db479/fbc2a48e12060449",
+    "ALB_HTTPS_LISTENER_ARN": "arn:aws:elasticloadbalancing:us-east-1:750321:listener/app/ServiceEnablerALB/9a80a67ebf0db479/b7287c03e8dcfbc3"
+  },
+  "ENVIRONMENT": {
+    "VPCX": {
+      "CREDS_API_HOSTNAME": "pygqxstmyi.execute-api.us-east-1.amazonaws.com",
+      "CREDS_API_VPCE_ENDPOINT": "https://vpce-012710bfc69-kykwwlo6.execute-api.us-east-1.vpce.amazonaws.com/dev/v1/accounts/<ACCOUNT_ALIAS>/roles/admin/credentials",
+      "CREDS_API_SCOPE": "https://clx-awsapi-credential-dev.test-org.com/.default",
+      "APPSYNC_INFO_SECRET_NAME": "NextBot/AppSync",
+      "UPDATE_PB_API_SCOPE": "https://test-org.onmicrosoft.com/clx-awsapi-service-enablement-dev/.default",
+      "UPDATE_PB_API_URL": "http://internal-ServiceEnablerALB-29700034.us-east-1.elb.amazonaws.com/account/iampb/update"
+    },
+    "OAUTH": {
+      "MSFT_IDP_APP_ID": "https://clx-awsapi-exception-dev.test-org.com"
+    },
+    "APP_VARS": {
+      "APP_CLIENT_ID": "099345f5-eeff-4d69-8912-a47f6b1e",
+      "APP_SECRETS_NAME": "nextbot/exception_secrets"
+    }
+  },
+  "TESTING": {
+    "API_ENDPOINT": "https://internal-ServiceEnablerALB-29700034.us-east-1.elb.amazonaws.com",
+    "TEST_ACCOUNT": "itxyz-046",
+    "TEST_ACCOUNT_NUMBER": "2854038"
+  }
+}

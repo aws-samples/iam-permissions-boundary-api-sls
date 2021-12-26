@@ -1,0 +1,22 @@
+{
+   "ENVIRONMENT": {
+      "LDAP": {
+         "LDAP_SERVER": "ldap://nadir.test.com:3268",
+         "LDAP_SEARCH_BASE": "DC=test,DC=com",
+         "LDAP_USERNAME": "savchook",
+         "LDAP_PASS_SECRET_NAME": "ldap-password",
+         "LDAP_OBJECT_CLASS": "person",
+         "LDAP_GROUP_NAME": "ITS-EP-APP-ITxVPCx-ITxAdmins",
+         "LDAP_USER_LOOKUP_ATTRIBUTE": "userPrincipalName",
+         "LDAP_GROUP_LOOKUP_ATTRIBUTE": "name"
+      },
+      "OAUTH": {
+         "MSFT_OAUTH2_TOKEN_URL": "https://login.microsoftonline.com/3ac94b33-9135-4821-9502-eafda6592a35/oauth2/v2.0/token",
+         "MSFT_IDP_TENANT_ID": "3ac94b33-9135-4821-9502-eafda6592a35",
+         "MSFT_IDP_CLIENT_ROLES": "writer"
+      },
+      "APP_VARS": {
+         "PB_POLICY_ARN_TPL":  "arn:aws:iam::<ACCOUNT_NUM>:policy/itx/core/VpcxPermissionsBoundaryPolicy1"
+      }
+   }
+}
