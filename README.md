@@ -20,14 +20,14 @@ This Serverless application deploys an API to enable, remove and verify permissi
 ```
 
 ## Endpoints
-```
 
+```
 Lambda Endpoints:
     Verify Account Permission Boundary Exception:  POST /account/exceptions/pb-exception/verify 
     Enable Account Permission Boundary Exception:  POST /account/exceptions/pb-exception/enable 
     Disable Account Permission Boundary Exception: DELETE /account/exceptions/pb-exception/disable 
+```
 
----
 ## Local env setup and configuration
 
 ```shell script
@@ -76,9 +76,6 @@ behave verify_pb_exceptions/tests/bdd/
 ## OpenAPI Spec
 The OpenAPI spec for the API is located at [docs/openapi.yml](docs/openapi.yml)
 
-## Example Usage
-
-```
 ## Example Usage
 ```bash
 curl -X GET 
